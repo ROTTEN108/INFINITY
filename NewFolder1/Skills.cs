@@ -1884,7 +1884,7 @@ namespace INFINITY
         }
         public void Update()
         {
-            if(stomping && gameObject.transform.position.y <= 8.8f)
+            if(stomping && gameObject.transform.position.y <= 6.8f)
             {
                 stomping = false;
                 if(gameObject.LocateMyFSM("Control").ActiveStateName == "SD9")
@@ -2424,6 +2424,22 @@ namespace INFINITY
 
             });
         }
+        public void BossRoarWave()
+        {
+            var fsmWave = ItemPool.HK.LocateMyFSM("Control").GetState("Intro Roar").GetAction<CreateObject>().gameObject.Value;
+
+            var wave = Instantiate(fsmWave, gameObject.transform.position, new Quaternion());
+
+            wave.GetComponent<DisableAfterTime>().waitTime = 0.16f;
+
+            wave.transform.Find("wave 1").localScale = new Vector3(2.5f, 2.5f, 1f);
+
+            wave.transform.Find("wave 2").GetComponent<SpriteRenderer>().enabled = false;
+
+            wave.SetActive(true);
+
+            wave.AddComponent<ObjDelayRecycle>().DelayRecycle(0.151f);
+        }
         public void VelocitySetZero()
         {
             gameObject.GetComponent<Rigidbody2D>().velocity = Vector3.zero;
@@ -2617,6 +2633,7 @@ namespace INFINITY
         int nail11Count = 0;
         float r1 = 0;
         float r2 = 0;
+        float skill11scaleY = 1;
         float skill11LoopTime = 0.1f;
         Vector3 Skill11Pos = new Vector3(0, 0, 0);
         public void Skill11NailSummon(float time)
@@ -2642,16 +2659,15 @@ namespace INFINITY
             nail11Count++;
 
             var nail = Instantiate(ItemPool.Nail, Skill11Pos + pos, Quaternion.Euler(0,0,0));
-            nail.transform.localScale = new Vector3(nail.transform.localScale.x, nail.transform.localScale.y * gameObject.transform.localScale.y, 1f);
             nail.transform.SetParent(null);
 
             if(HeroController.instance.transform.position.x <= Skill11Pos.x)
             {
-                nail.GetComponent<Rigidbody2D>().velocity = new Vector2(-(5.5f + r1 * 3), -(7.5f + r2)) * 4;
+                nail.GetComponent<Rigidbody2D>().velocity = new Vector2(-(5.5f + r1 * 3), -(7.5f + r2)) * 5;
             }
             else
             {
-                nail.GetComponent<Rigidbody2D>().velocity = new Vector2(5.5f + r1, -(7.5f + r2)) * 4;
+                nail.GetComponent<Rigidbody2D>().velocity = new Vector2(5.5f + r1, -(7.5f + r2)) * 5;
             }
             nail.transform.Find("Beam").gameObject.GetComponent<DeactivateAfter2dtkAnimation>().enabled = false;
 
@@ -2888,6 +2904,8 @@ namespace INFINITY
             });
             gameObject.LocateMyFSM("Control").GetState("SLPhase3").AddMethod(() =>
             {
+                BossRoarWave();
+
                 gameObject.GetComponent<Skills>().LineAppear(5);
 
                 FLysBurst();
@@ -2939,6 +2957,8 @@ namespace INFINITY
             });
             gameObject.LocateMyFSM("Control").GetState("SLPhase4").AddMethod(() =>
             {
+                BossRoarWave();
+
                 FLysBurst();
 
                 HeroController.instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ItemPool.Land, 1f);
@@ -3002,6 +3022,8 @@ namespace INFINITY
             });
             gameObject.LocateMyFSM("Control").GetState("SLPhase5").AddMethod(() =>
             {
+                BossRoarWave();
+
                 FLysBurst();
 
                 HeroController.instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ItemPool.Land, 1f);
@@ -3138,7 +3160,14 @@ namespace INFINITY
             }
             public void SummonOne()
             {
-                var wave = Instantiate(ItemPool.Wave, gameObject.transform.parent.transform.parent.transform.position, Quaternion.Euler(0, 0, 0));
+                Vector3 wavePos = gameObject.transform.parent.transform.parent.transform.position;
+
+                if (wavePos.x < HeroController.instance.transform.position.x - 25f)
+                {
+                    wavePos = new Vector3(HeroController.instance.transform.position.x - 25, wavePos.y, wavePos.z);
+                }
+
+                var wave = Instantiate(ItemPool.Wave, wavePos, Quaternion.Euler(0, 0, 0));
                 wave.GetComponent<Rigidbody2D>().velocity = new Vector2(speed * 2, 0f);
                 wave.transform.localScale = new Vector3(wave.transform.localScale.x * Math.Sign(speed) * 1.5f, wave.transform.localScale.y * 3f, wave.transform.localScale.z);
                 //wave.transform.position = gameObject.transform.parent.transform.position;
@@ -3285,6 +3314,9 @@ namespace INFINITY
             });
             gameObject.LocateMyFSM("Control").GetState("FB_S").AddMethod(() =>
             {
+
+                BossRoarWave();
+
                 if (HardMode == 0)
                 {
                     hardmodeEnd = true;
@@ -3517,7 +3549,7 @@ namespace INFINITY
                 if (gameObject.name == "MoonForPlayer")
                 {
                     slashCountMax = 5;
-                    SetDamageEnemy(gameObject.GetComponent<Skills>().MainSlash, 4 * PlayerData.instance.nailDamage, angle + 90f, 2f);
+                    SetDamageEnemy(gameObject.GetComponent<Skills>().MainSlash, 4 * PlayerData.instance.GetInt("nailDamage"), angle + 90f, 2f);
                     //gameObject.GetComponent<Skills>().Turn();
                     gameObject.GetComponent<LockAngleWaitForAttack>().StartToLockForPlayer(angle, 16f);
                     gameObject.GetComponent<Skills>().LineAppear(1);
@@ -3792,11 +3824,15 @@ namespace INFINITY
 
                 gameObject.GetComponent<BossBurstControl>().DstabOn();
 
+                gameObject.GetComponent<DamageHero>().damageDealt = 2;
+
                 WaveLittleSummon(gameObject.transform.position.x + 1f, 8f);
                 WaveLittleSummon(gameObject.transform.position.x - 1f, -8f);
             });
             gameObject.LocateMyFSM("Control").GetState("SL5").AddMethod(() =>
             {
+                gameObject.GetComponent<DamageHero>().damageDealt = 0;
+
                 FLysBurst();
                 HeroController.instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ItemPool.Land, 1f);
                 ItemPool.RockPt_Thin.GetComponent<RockPtControl>().On();
