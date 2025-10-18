@@ -1,16 +1,17 @@
-﻿using HutongGames.PlayMaker.Actions;
+﻿using HKMirror.Reflection;
+using HutongGames.PlayMaker.Actions;
 using Modding;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Vasi;
-using System.Collections.Generic;
-using HKMirror.Reflection;
-using System.Collections;
-using System.IO;
-using System.Reflection;
-using TMPro;
+using static Mono.Math.BigInteger;
 
 namespace INFINITY
 {
@@ -47,10 +48,12 @@ namespace INFINITY
         public static GameObject Wave;
         public static GameObject Spike;
         public static GameObject Corpse;
+        public static GameObject RoarWave;
         public static AudioClip Teleport;
         public static AudioClip Slash;
         public static AudioClip Dir;
         public static AudioClip Land;
+        public static AudioClip Explode;
 
         public static GameObject Scene_Fence;
         public static GameObject Scene_Gate;
@@ -141,6 +144,11 @@ namespace INFINITY
             gameObject.LocateMyFSM("Control").SetState("Flash Up");
         }
        
+        public void BattleStart()
+        {
+            Music3Stop();
+        }
+       
         public void BattleOver()
         {
 
@@ -148,8 +156,12 @@ namespace INFINITY
         }
         void Music3Enter()
         {
-            HeroController.instance.gameObject.GetComponent<AudioSource>().pitch = 1f;
-            HeroController.instance.gameObject.GetComponent<AudioSource>().PlayOneShot(ItemPool.BGM3, 1f);
+            ItemPool.BossTitle.GetComponent<AudioSource>().PlayOneShot(ItemPool.BGM3, 1f);
+        }
+        void Music3Stop()
+        {
+            ItemPool.BossTitle.GetComponent<AudioSource>().enabled = false;
+            ItemPool.BossTitle.GetComponent<AudioSource>().enabled = true;
         }
     }
     public class RockPtControl: MonoBehaviour
@@ -158,6 +170,133 @@ namespace INFINITY
         {
             gameObject.transform.position = new Vector3(INFINITY.BOSS.transform.position.x, 4.98f, 0.006f);
             gameObject.GetComponent<ParticleSystem>().Play();
+        }
+    }
+
+    public class CorpseFlash : MonoBehaviour
+    {
+        System.Random random = new System.Random();
+        double R1 => random.NextDouble();
+        double R2 => random.NextDouble();
+        double R3 => random.NextDouble();
+
+        float freezeTime = 4f;
+
+        float loopTime = 0.15f;
+
+        float loopTime_Orig = 0.15f;
+
+        float minTime = 0.02f;
+
+        float factor1 = 4f;
+
+        float sigh = 1;
+        public void Start()
+        {
+            Flash();
+        }
+        public void Flash()
+        {
+            loopTime = loopTime_Orig;
+
+            GameManager.instance.StartCoroutine(GameManager.instance.FreezeMoment(0.1f, freezeTime, 0f, 0.15f));
+
+            FlashOnceLoop();
+
+            Invoke("FlashOnceLoopEnd", freezeTime * 0.15f + 0.1f);
+        }
+        public void FlashOnceLoop()
+        {
+            var glow = Instantiate(ItemPool.Glow, HeroController.instance.gameObject.transform.position + new Vector3((-15f + (float)R1 * 15f) * sigh, -10f + (float)R2 * 20f, 0f), Quaternion.Euler(0, 0, 0));
+
+            sigh *= -1;
+
+            glow.transform.localScale = new Vector3(1.4f, 1.3f, 0.5f) * (0.5f + (float)R3 * 1.5f);
+
+            glow.SetActive(true);
+            glow.AddComponent<DelayDestory>();
+            glow.GetComponent<DelayDestory>().On(2f);
+
+            Invoke("FlashOnceLoop", loopTime);
+
+            loopTime += (minTime - loopTime) / factor1;
+
+            HeroController.instance.GetComponent<AudioSource>().PlayOneShot(ItemPool.Teleport, 1f);
+        }
+        public void FlashOnceLoopEnd()
+        {
+            BigFlash();
+            CancelInvoke("FlashOnceLoop");
+        }
+
+        public void BigFlash()
+        {
+            var glow = Instantiate(ItemPool.Glow, HeroController.instance.gameObject.transform.position, Quaternion.Euler(0, 0, 0));
+
+            glow.transform.localScale = new Vector3(1.4f, 1.3f, 0.5f) * 6f;
+
+            glow.SetActive(true);
+            glow.AddComponent<DelayDestory>();
+            glow.GetComponent<DelayDestory>().On(2f);
+
+            HeroController.instance.GetComponent<AudioSource>().PlayOneShot(ItemPool.Explode, 1f);
+
+            Invoke("CamDown", 0.2f);
+        }
+
+        public void CamDown()
+        {
+            CamControl.Cam.GetComponent<CamControl>().CamDown();
+
+            Invoke("CamUp", 4f);
+
+            HeroMove();
+
+            Invoke("HeroReady", 4.3f);
+
+            Invoke("HeroGetUp", 4.5f);
+        }
+
+        public void HeroMove()
+        {
+            GameObject left = null;
+
+            foreach (GameObject obj in GameObject.FindObjectsOfType<GameObject>())
+            {
+                if(obj.name.Contains("Floor") && obj.transform.position.x > 300)
+                {
+                    if(left == null || obj.transform.position.x < left.transform.position.x)
+                    {
+                        left = obj;
+                    }
+                }
+            }
+            HeroController.instance.transform.position = new Vector3(left.transform.position.x - 2f, 6.4f, HeroController.instance.transform.position.z);
+
+            HeroController.instance.gameObject.LocateMyFSM("Dream Return").SetState("Prostrate");
+
+            HeroController.instance.gameObject.LocateMyFSM("Dream Return").enabled = false;
+
+            HeroController.instance.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            HeroController.instance.GetComponent<Rigidbody2D>().gravityScale = 0f;
+
+        }
+
+        public void HeroReady()
+        {
+            HeroController.instance.gameObject.LocateMyFSM("Dream Return").enabled = true;
+        }
+
+        public void HeroGetUp()
+        {
+            HeroController.instance.gameObject.LocateMyFSM("Dream Return").SetState("Prostrate");
+        }
+
+        public void CamUp()
+        {
+            HeroController.instance.GetComponent<Rigidbody2D>().gravityScale = 1f;
+
+            CamControl.Cam.GetComponent<CamControl>().CamUp();
         }
     }
 }

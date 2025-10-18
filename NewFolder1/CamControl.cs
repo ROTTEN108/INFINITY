@@ -117,5 +117,15 @@ namespace INFINITY
             CancelInvoke("CamCloseLoop");
             CancelInvoke("CamAwayLoop");
         }
+
+        public void CamDown()
+        {
+            Cam.GetComponent<Camera>().enabled = false;
+        }
+
+        public void CamUp()
+        {
+            Cam.GetComponent<Camera>().enabled = true;
+        }
     }
 }

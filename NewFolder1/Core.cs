@@ -25,7 +25,7 @@ namespace INFINITY
     {
         public override string GetVersion()
         {
-            return "0.0.10.0";
+            return "0.0.11.0";
         }
 
         public List<IMenuMod.MenuEntry> GetMenuData(IMenuMod.MenuEntry? toggleButtonEntry)
@@ -150,6 +150,10 @@ namespace INFINITY
             ItemPool.BGM2 = LoadAudioClip("INFINITY.Resources.BGM2.wav");
             ItemPool.BGM3 = LoadAudioClip("INFINITY.Resources.BGM3.wav");
 
+            var radiance = preloadedObjects["GG_Radiance"]["Boss Control"].transform.Find("Absolute Radiance").gameObject;
+
+            ItemPool.Explode = radiance.LocateMyFSM("Control").GetState("Final Explode").GetAction<AudioPlayerOneShotSingle>().audioClip.Value as AudioClip;
+
             var beam1 = preloadedObjects["GG_Hollow_Knight"]["Battle Scene/HK Prime/Slashes/Slash1"].gameObject;
             beam1.GetComponent<PolygonCollider2D>().enabled = true;
             beam1.GetComponent<PolygonCollider2D>().points = new Vector2[] {new Vector2(-2.5477f, -0.2735f), new Vector2(-1.6684f, 0.2882f), new Vector2(-0.57f, 0.717f), new Vector2(0.785f, 0.8595f), new Vector2(-0.2458f, -1.2983f), new Vector2(-1.0813f, -1.2427f), new Vector2(-2.0077f, -1.101f), new Vector2(-2.5024f, -0.8201f) };
@@ -225,6 +229,9 @@ namespace INFINITY
 
             bg.LocateMyFSM("Control").GetState("Title Up").GetAction<Wait>().time = 1.5f;
             bg.SetActive(true);
+
+            bg.GetComponent<AudioSource>().maxDistance = 99999f;
+            bg.GetComponent<AudioSource>().minDistance = 99999f;
 
             ItemPool.BossTitle = bg.gameObject;
             
@@ -829,9 +836,14 @@ namespace INFINITY
             orig(self);
             if (INFINITY.settings_.on == true)
             {
+                if (self.FsmName == "Spell Control" && self.gameObject.name == "Knight")
+                {
+                    self.ChangeTransition("Has Fireball?", "CAST", "Inactive");
+                }
                 if (self.FsmName == "corpse" && self.gameObject.name == "Corpse HK Prime(Clone)")
                 {
                     self.GetState("Land").GetAction<Wait>().time = 10000;
+
                     self.GetState("Init").AddMethod(()=>
                     {
                         if (fountain.transform.Find("Fountain Inspect(Clone)"))
@@ -845,9 +857,19 @@ namespace INFINITY
 
                             ItemPool.BossTitle.GetComponent<BossTitleControl>().BattleOver();
                         }
-                        self.gameObject.transform.position += new Vector3(200, 200, 0);
                         self.SetState("Land");
-                    });
+
+                        self.gameObject.transform.position = fountain.transform.position + new Vector3(-8f, 2, -0.05f);
+
+                        self.gameObject.AddComponent<CorpseFlash>();
+
+
+                        self.gameObject.transform.localScale = new Vector3(1, 1, self.gameObject.transform.localScale.z);
+
+                        self.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+
+
+                });
                 }
                 if (self.FsmName == "Control" && self.gameObject.name == "Grubberfly BeamR")
                 {

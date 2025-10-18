@@ -182,9 +182,8 @@
     <Reference Include="Vasi">
       <HintPath>F:\Managed\Vasi\Vasi.dll</HintPath>
     </Reference>
-    <Reference Include="WavLib, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Desktop\WavLib.dll</HintPath>
+    <Reference Include="WavLib">
+      <HintPath>E:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\PURITY\WavLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -198,12 +197,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NewFolder1\SceneControl.cs" />
     <Compile Include="NewFolder1\Skills.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\shaders" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\camera" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Spell.png" />
