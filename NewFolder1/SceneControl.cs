@@ -180,9 +180,15 @@ namespace INFINITY
             spike.GetComponent<DamageHero>().damageDealt = 9999;
             spike.SetActive(true);
         }
+        public static void BallFsmDisable()
+        {
+
+        }
         public static void Detect()
         {
-            if(INFINITY.BOSS != null)
+            ItemPool.BossTitle.GetComponent<BossTitleControl>().BattleStart();
+
+            if (INFINITY.BOSS != null)
             {
                 INFINITY.BOSS.GetComponent<SkillsControl>().AnimFreezeTime(10000f, 0f);
                 INFINITY.BOSS.transform.position += new Vector3(0f, -200f, 0f);
@@ -512,8 +518,8 @@ namespace INFINITY
 
                 for(int i = 0;i < 3;i++)
                 {
-                    Vector3 localPosR = new Vector3(16.9f + 10f * i, -4.4836f, -2.8909f);
-                    Vector3 localPosL = new Vector3(-16.9f - 10f * i, -4.4836f, -2.8909f);
+                    Vector3 localPosR = new Vector3(16.9f + 10f * i, -4.4836f, -2.8809f);
+                    Vector3 localPosL = new Vector3(-16.9f - 10f * i, -4.4836f, -2.8809f);
                     var lampR = Instantiate(ItemPool.Scene_Light_4, gameObject.transform.position + localPosR, Quaternion.Euler(0, 0, 0));
                     var lampL = Instantiate(ItemPool.Scene_Light_4, gameObject.transform.position + localPosL, Quaternion.Euler(0, 0, 0));
                 }
