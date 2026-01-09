@@ -11,7 +11,6 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using TMPro;
-//using WavLib;
 using static INFINITY.SceneControl;
 using GlobalEnums;
 using HKMirror.Hooks.OnHooks;
@@ -25,7 +24,7 @@ namespace INFINITY
     {
         public override string GetVersion()
         {
-            return "0.0.11.0";
+            return "0.2.0.0";
         }
 
         public List<IMenuMod.MenuEntry> GetMenuData(IMenuMod.MenuEntry? toggleButtonEntry)
@@ -64,6 +63,21 @@ namespace INFINITY
                 Saver = delegate (int i)
                 {
                     settings_.afterimageOn = (i == 0);
+                }
+            });
+            menus.Add(new IMenuMod.MenuEntry
+            {
+                Name = OtherLanguage("关闭抬手预警线", "Turn off pre-warning line"),
+                Description = OtherLanguage("获得更“沉浸”的体验和更不合理的难度，以及更大视野", "Gain a more immersive experience, more unreasonable difficulty, and broader perspective."),
+                Values = new string[]
+                {
+                    Language.Language.Get("MOH_ON", "MainMenu"),
+                    Language.Language.Get("MOH_OFF", "MainMenu")
+                },
+                Loader = (() => (!settings_.lineOff) ? 1 : 0),
+                Saver = delegate (int i)
+                {
+                    settings_.lineOff = (i == 0);
                 }
             });
             menus.Add(new IMenuMod.MenuEntry
@@ -329,7 +343,6 @@ namespace INFINITY
             */
             On.GameManager.LoadGame += GameManager_LoadGame;
         }
-
         private void GameManager_LoadGame(On.GameManager.orig_LoadGame orig, GameManager self, int saveSlot, Action<bool> callback)
         {
             if(INFINITY.settings_.on)
@@ -337,22 +350,18 @@ namespace INFINITY
                 ModHooks.HeroUpdateHook += ModHooks_HeroUpdateHook;
                 ModHooks.LanguageGetHook += ModHooks_LanguageGetHook_Workshop;
                 On.PlayMakerFSM.Start += PlayMakerFSM_Start;
-                UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
                 On.GameManager.FreezeMoment_int += GameManager_FreezeMoment_int;
-
             }
             else
             {
                 ModHooks.HeroUpdateHook -= ModHooks_HeroUpdateHook;
                 ModHooks.LanguageGetHook -= ModHooks_LanguageGetHook_Workshop;
                 On.PlayMakerFSM.Start -= PlayMakerFSM_Start;
-                UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
                 On.GameManager.FreezeMoment_int -= GameManager_FreezeMoment_int;
             }
 
             orig(self, saveSlot, callback);
         }
-
 
         public static void GameManager_FreezeMoment_int(On.GameManager.orig_FreezeMoment_int orig, GameManager self, int type)
         {
@@ -479,59 +488,6 @@ namespace INFINITY
             texture2D = new Texture2D(1, 1);
             texture2D.LoadImage(bytes, true);
             return texture2D;
-        }
-        public static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (scene.name == "GG_Hollow_Knight")
-            {
-                /*
-                GameObject[] all = GameObject.FindObjectsOfType<GameObject>();
-                foreach (var obj in all)
-                {
-                    if (obj.name.Contains("SceneBorder") || obj.name.Contains("clouds") || obj.name.Contains("Lock Zone") || obj.name.Contains("HK_glow_wall") || obj.name.Contains("GG_Arena_PrefabGG") || obj.name.Contains("Edge"))
-                    {
-                        obj.Recycle();
-                    }
-                    if (obj.name.Contains("Death Break Chains"))
-                    {
-                        obj.transform.localScale *= 2;
-                    }
-                    if (obj.name.Contains("Battle"))
-                    {
-                        var godseeker = obj.transform.Find("Godseeker Crowd").gameObject;
-                        if(godseeker != null)
-                        {
-                            godseeker.Recycle();
-                        }
-                    }
-                    if (obj.name.Contains("TileMap Render Data"))
-                    {
-                        var sceneMap = obj.transform.Find("Scenemap").gameObject;
-                        var chunk0 = sceneMap.transform.Find("Chunk 0 0").gameObject;
-                        var chunk1 = sceneMap.transform.Find("Chunk 0 1").gameObject;
-                        chunk0.Recycle();
-                        EdgeCollider2D[] edgeCollider2Ds = chunk1.GetComponents<EdgeCollider2D>();
-                        foreach(var edgeCollider2D in edgeCollider2Ds)
-                        {
-                            if(edgeCollider2D.edgeCount == 5)
-                            {
-                                HeroController.instance.transform.position += new Vector3(0f, 0.5f, 0f);
-                                Vector2[] vectorArray = { new Vector2(-200, 5), new Vector2(200, 5), new Vector2(200, -5), new Vector2(-200, -5) };
-                                edgeCollider2D.points = vectorArray;
-                            }
-                            else
-                            {
-                                edgeCollider2D.enabled = false;
-                            }
-                        }
-                    }
-                    if (obj.name.Contains("CameraLockArea"))
-                    {
-                        obj.SetActive(false);
-                    }
-                }
-                */
-            }
         }
         public static string ModHooks_LanguageGetHook(string key, string sheet, string text)
         {
@@ -712,7 +668,7 @@ namespace INFINITY
             var gc = GameCameras.instance.gameObject;
             var cp = gc.transform.Find("CameraParent");
             var cam = cp.transform.Find("tk2dCamera").gameObject;
-            if (hero != null && cam != null)
+            if (hero != null && cam != null && hero.GetComponent<SceneSwitchDetector>() == null)
             {
                 HeroController.instance.gameObject.AddComponent<SceneSwitchDetector>();
                 HeroController.instance.gameObject.AddComponent<SummonMoon>();

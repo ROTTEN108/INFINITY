@@ -494,6 +494,8 @@ namespace INFINITY
             }
             public void TitleOn()
             {
+
+
                 title.GetComponent<BossTitleControl>().On();
 
                 //INFINITY.BOSS.LocateMyFSM("Control").GetState("Intro Roar").GetAction<ApplyMusicCue>().OnEnter();
@@ -1114,14 +1116,6 @@ namespace INFINITY
             }
             void OnSceneLoaded(Scene scene, LoadSceneMode mode)
             {
-                if(INFINITY.settings_.skillGot && INFINITY.settings_.skillOn)
-                {
-                    CamControl.Cam.GetComponent<CamControl>().CamChange();
-                }
-                else
-                {
-                    CamControl.Cam.GetComponent<CamControl>().CamRecover();
-                }
                 if (scene.name == "GG_Hollow_Knight")
                 {
                     isInBattle = true;
@@ -1137,6 +1131,16 @@ namespace INFINITY
                 }
                 else
                 {
+                    CamControl.Cam.GetComponent<CamControl>().CancelAll();
+
+                    if (INFINITY.settings_.skillGot && INFINITY.settings_.skillOn)
+                    {
+                        CamControl.Cam.GetComponent<CamControl>().CamChange();
+                    }
+                    else
+                    {
+                        CamControl.Cam.GetComponent<CamControl>().CamRecover();
+                    }
 
                     On.GameManager.FreezeMoment_int -= INFINITY.GameManager_FreezeMoment_int;
                     //On.GameManager.FreezeMoment_int += INFINITY.GameManager_FreezeMoment_int_Recover;

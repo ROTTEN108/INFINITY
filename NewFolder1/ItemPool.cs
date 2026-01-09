@@ -99,6 +99,27 @@ namespace INFINITY
             gameObject.Recycle();
         }
     }
+    public class BeamMove : MonoBehaviour
+    {
+        public void Start()
+        {
+            SetX();
+        }
+        public void On(float delayTime)
+        {
+            Invoke("MoveLoop", delayTime);
+        }
+        public void SetX()
+        {
+            gameObject.transform.localPosition += new Vector3(-50f, 0f, 0f);
+        }
+        public void MoveLoop()
+        {
+            Invoke("MoveLoop", 0.02f);
+
+            gameObject.transform.localPosition += new Vector3(12f, 0f, 0f);
+        }
+    }
     public class BossTitleControl : MonoBehaviour
     {
         public void Start()

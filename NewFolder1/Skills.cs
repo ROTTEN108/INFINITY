@@ -714,11 +714,34 @@ namespace INFINITY
             public void On(float scaleFactor)
             {
                 factor1 = scaleFactor;
-                for (int i = 0;i < gameObject.transform.childCount && gameObject.transform.GetChild(i).name.Contains("Beam"); i++)
+
+                if(settings_.lineOff)
                 {
-                    var line = gameObject.transform.GetChild(i).gameObject;
-                    line.transform.localScale = new Vector3(5f, 10f * Math.Sign(line.transform.localScale.y) * scaleFactor, 1f);
-                    line.SetActive(true);
+                    /*
+                    var glow = Instantiate(ItemPool.Glow, gameObject.transform.position, Quaternion.Euler(0, 0, gameObject.transform.eulerAngles.z + 90f));
+                    glow.transform.localScale = new Vector3(1.4f, 1.4f, 0.5f) * 2.5f;
+                    glow.SetActive(true);
+                    glow.AddComponent<DelayDestory>();
+                    glow.GetComponent<DelayDestory>().On(2f);
+                    */
+
+                    for (int i = 0; i < gameObject.transform.childCount && gameObject.transform.GetChild(i).name.Contains("Beam"); i++)
+                    {
+                        var line = gameObject.transform.GetChild(i).gameObject;
+                        line.transform.localScale = new Vector3(5f, 10f * Math.Sign(line.transform.localScale.y) * scaleFactor, 1f);
+                        line.SetActive(true);
+                        line.AddComponent<BeamMove>().On(0f);
+                    }
+
+                }
+                else
+                {
+                    for (int i = 0; i < gameObject.transform.childCount && gameObject.transform.GetChild(i).name.Contains("Beam"); i++)
+                    {
+                        var line = gameObject.transform.GetChild(i).gameObject;
+                        line.transform.localScale = new Vector3(5f, 10f * Math.Sign(line.transform.localScale.y) * scaleFactor, 1f);
+                        line.SetActive(true);
+                    }
                 }
 
                 DelayLight(0.7f);
@@ -750,7 +773,7 @@ namespace INFINITY
                 IEnumerator DelayedExecution(float time)
                 {
                     yield return new WaitForSeconds(time);
-                    light.transform.localScale = new Vector3(18f, 6f, 1f) * factor1 * gameObject.transform.localScale.y;
+                    light.transform.localScale = new Vector3(16f, 6f, 1f) * factor1 * gameObject.transform.localScale.y;
                     light.AddComponent<ObjDelayRecycle>();
                     light.GetComponent<ObjDelayRecycle>().DelayRecycle(0.15f);
                     light.GetComponent<ObjDelayRecycle>().DelayRecycle(0.15f);
@@ -881,50 +904,53 @@ namespace INFINITY
         }
         public void LineAppear(int type)
         {
-            LineDisAppear();
-            if (type == 0)
+            if(!settings_.lineOff)
             {
-                Line.SetActive(true);
-            }
-            else if(type == 1)
-            {
-                Line.SetActive(true);
-                Line1.SetActive(true);
-                Line2.SetActive(true);
-            }
-            else if(type == 2)
-            {
-                Line.SetActive(true);
-                Line1.SetActive(true);
-                Line2.SetActive(true);
-                Line3.SetActive(true);
-                Line4.SetActive(true);
-            }
-            else if(type == 3)
-            {
-                Line5.SetActive(true);
-                Line6.SetActive(true);
-            }
-            else if(type == 4)
-            {
-                Line1.SetActive(true);
-                Line2.SetActive(true);
-            }
-            else if(type == 5)
-            {
-                Line7.SetActive(true);
-                Line8.SetActive(true);
+                LineDisAppear();
+                if (type == 0)
+                {
+                    Line.SetActive(true);
+                }
+                else if (type == 1)
+                {
+                    Line.SetActive(true);
+                    Line1.SetActive(true);
+                    Line2.SetActive(true);
+                }
+                else if (type == 2)
+                {
+                    Line.SetActive(true);
+                    Line1.SetActive(true);
+                    Line2.SetActive(true);
+                    Line3.SetActive(true);
+                    Line4.SetActive(true);
+                }
+                else if (type == 3)
+                {
+                    Line5.SetActive(true);
+                    Line6.SetActive(true);
+                }
+                else if (type == 4)
+                {
+                    Line1.SetActive(true);
+                    Line2.SetActive(true);
+                }
+                else if (type == 5)
+                {
+                    Line7.SetActive(true);
+                    Line8.SetActive(true);
 
-                LinesPhase3();
+                    LinesPhase3();
+                }
+                else if (type == 6)
+                {
+                    Line7.SetActive(true);
+                    Line8.SetActive(true);
+                    LinesPhase5();
+                }
+                LinesStartToClose();
+                //Invoke("LineDisAppear", 1f);
             }
-            else if(type == 6)
-            {
-                Line7.SetActive(true);
-                Line8.SetActive(true);
-                LinesPhase5();
-            }
-            LinesStartToClose();
-            //Invoke("LineDisAppear", 1f);
         }
         public void LineDisAppear()
         {
@@ -991,54 +1017,6 @@ namespace INFINITY
         public List<GameObject> floors = new List<GameObject>();
         public void Start()
         {
-            if(!gameObject.GetComponent<Fadeimage>())
-                gameObject.AddComponent<Fadeimage>();
-
-            if (!gameObject.GetComponent<SceneControl>())
-                gameObject.AddComponent<SceneControl>();
-
-            if (!gameObject.GetComponent<SlashBeam>())
-                gameObject.AddComponent<SlashBeam>();
-
-            if (!gameObject.GetComponent<OneSlash>())
-                gameObject.AddComponent<OneSlash>();
-
-            if (!gameObject.GetComponent<OneSlashLight>())
-                gameObject.AddComponent<OneSlashLight>();
-
-            if (!gameObject.GetComponent<LockAngleWaitForAttack>())
-                gameObject.AddComponent<LockAngleWaitForAttack>();
-
-            if (!gameObject.GetComponent<OneSlashAnyAngle>())
-                gameObject.AddComponent<OneSlashAnyAngle>();
-
-            if (!gameObject.GetComponent<SkillsControl>())
-                gameObject.AddComponent<SkillsControl>();
-
-            if (!gameObject.GetComponent<AngleSystem>())
-                gameObject.AddComponent<AngleSystem>();
-
-            if (!gameObject.GetComponent<TeleportSystem>())
-                gameObject.AddComponent<TeleportSystem>();
-
-            if (!gameObject.GetComponent<SlashColliderControl>())
-                gameObject.AddComponent<SlashColliderControl>();
-
-            if (!gameObject.GetComponent<Dtab>())
-                gameObject.AddComponent<Dtab>();
-
-            if (!gameObject.GetComponent<BossSkillChoice>())
-                gameObject.AddComponent<BossSkillChoice>();
-
-            if (!gameObject.GetComponent<Phase5Arena>())
-                gameObject.AddComponent<Phase5Arena>();
-
-            if (!gameObject.GetComponent<BossBurstControl>())
-                gameObject.AddComponent<BossBurstControl>();
-
-            gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
-
-            GetBall();
             /*
             StartCoroutine(DelayedExecution1(0.5f));
             IEnumerator DelayedExecution1(float time)
@@ -1047,70 +1025,124 @@ namespace INFINITY
                 GetBall();
             }
             */
-            SlashCollisionChange();
-            SetLine();
             //ShaderLoader.Load();
-            StartCoroutine(DelayedExecution(0.2f));
+            StartCoroutine(DelayedExecution(0.3f));
             IEnumerator DelayedExecution(float time)
             {
                 yield return new WaitForSeconds(time);
-                CameraControl.BattleStart();
-                var obj1 = GameObject.Find("GG_Arena_Prefab").gameObject;
-                var floor = obj1.transform.Find("Floor").gameObject;
-                //var chains = obj1.transform.Find("Death Break Chains").gameObject;
-                if(ItemPool.Floor == null)
+
+                if (!gameObject.GetComponent<Fadeimage>())
+                    gameObject.AddComponent<Fadeimage>();
+
+                if (!gameObject.GetComponent<SceneControl>())
+                    gameObject.AddComponent<SceneControl>();
+
+                if (!gameObject.GetComponent<SlashBeam>())
+                    gameObject.AddComponent<SlashBeam>();
+
+                if (!gameObject.GetComponent<OneSlash>())
+                    gameObject.AddComponent<OneSlash>();
+
+                if (!gameObject.GetComponent<OneSlashLight>())
+                    gameObject.AddComponent<OneSlashLight>();
+
+                if (!gameObject.GetComponent<LockAngleWaitForAttack>())
+                    gameObject.AddComponent<LockAngleWaitForAttack>();
+
+                if (!gameObject.GetComponent<OneSlashAnyAngle>())
+                    gameObject.AddComponent<OneSlashAnyAngle>();
+
+                if (!gameObject.GetComponent<SkillsControl>())
+                    gameObject.AddComponent<SkillsControl>();
+
+                if (!gameObject.GetComponent<AngleSystem>())
+                    gameObject.AddComponent<AngleSystem>();
+
+                if (!gameObject.GetComponent<TeleportSystem>())
+                    gameObject.AddComponent<TeleportSystem>();
+
+                if (!gameObject.GetComponent<SlashColliderControl>())
+                    gameObject.AddComponent<SlashColliderControl>();
+
+                if (!gameObject.GetComponent<Dtab>())
+                    gameObject.AddComponent<Dtab>();
+
+                if (!gameObject.GetComponent<BossSkillChoice>())
+                    gameObject.AddComponent<BossSkillChoice>();
+
+                if (!gameObject.GetComponent<Phase5Arena>())
+                    gameObject.AddComponent<Phase5Arena>();
+
+                if (!gameObject.GetComponent<BossBurstControl>())
+                    gameObject.AddComponent<BossBurstControl>();
+
+                gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
+
+                SlashCollisionChange();
+                SetLine();
+
+                GetBall();
+                SceneInit();
+            }
+            gameObject.GetComponent<DamageHero>().damageDealt = 0;
+        }
+
+        public void SceneInit()
+        {
+            CameraControl.BattleStart();
+            var obj1 = GameObject.Find("GG_Arena_Prefab").gameObject;
+            var floor = obj1.transform.Find("Floor").gameObject;
+            //var chains = obj1.transform.Find("Death Break Chains").gameObject;
+            if (ItemPool.Floor == null)
+            {
+                GameObject[] all = GameObject.FindObjectsOfType<GameObject>();
+                foreach (var obj in all)
                 {
-                    GameObject[] all = GameObject.FindObjectsOfType<GameObject>();
-                    foreach (var obj in all)
+                    if (obj.name.Contains("TileMap Render Data"))
                     {
-                        if (obj.name.Contains("TileMap Render Data"))
+                        var sceneMap = obj.transform.Find("Scenemap").gameObject;
+                        var chunk1 = sceneMap.transform.Find("Chunk 0 1").gameObject;
+                        chunk1.GetComponent<MeshRenderer>().enabled = false;
+                        EdgeCollider2D[] edgeCollider2Ds = chunk1.GetComponents<EdgeCollider2D>();
+                        foreach (var edgeCollider2D in edgeCollider2Ds)
                         {
-                            var sceneMap = obj.transform.Find("Scenemap").gameObject;
-                            var chunk1 = sceneMap.transform.Find("Chunk 0 1").gameObject;
-                            chunk1.GetComponent<MeshRenderer>().enabled = false;
-                            EdgeCollider2D[] edgeCollider2Ds = chunk1.GetComponents<EdgeCollider2D>();
-                            foreach (var edgeCollider2D in edgeCollider2Ds)
+                            if (edgeCollider2D.edgeCount == 5)
                             {
-                                if (edgeCollider2D.edgeCount == 5)
-                                {
-                                    HeroController.instance.transform.position += new Vector3(0f, 0.5f, 0f);
-                                    Vector2[] vectorArray = { new Vector2(-23, 5), new Vector2(-3, 5), new Vector2(-3, -5), new Vector2(-23, -5) };
-                                    edgeCollider2D.points = vectorArray;
-                                    ItemPool.Floor = chunk1;
-                                }
-                                else
-                                {
-                                    edgeCollider2D.enabled = false;
-                                }
+                                HeroController.instance.transform.position += new Vector3(0f, 0.5f, 0f);
+                                Vector2[] vectorArray = { new Vector2(-23, 5), new Vector2(-3, 5), new Vector2(-3, -5), new Vector2(-23, -5) };
+                                edgeCollider2D.points = vectorArray;
+                                ItemPool.Floor = chunk1;
+                            }
+                            else
+                            {
+                                edgeCollider2D.enabled = false;
                             }
                         }
                     }
                 }
-                var focus = gameObject.transform.Find("Focus Blast").gameObject;
-                var pt = focus.transform.Find("Particle_rocks_small").gameObject;
-                ItemPool.FloorPt = Instantiate(pt, new Vector3(0, 0, 0), new Quaternion());
-                ItemPool.FloorPt.GetComponent<ParticleSystem>().startSpeed = -10;
-                ItemPool.FloorPt.GetComponent<ParticleSystem>().emissionRate = 50;
-                var fl = Instantiate(floor, new Vector3(-232.59f, 10.01f, 32.4219f), Quaternion.Euler(0, 0, 0));
-                var floorCollision = Instantiate(ItemPool.Floor, fl.transform);
-                floorCollision.transform.localPosition = new Vector3(14.4782f, -10.01f, 0f);
-                fl.AddComponent<FloorFall>();
-                var floorPt = Instantiate(ItemPool.FloorPt, fl.transform);
-                floorPt.transform.localPosition = new Vector3(3.4764f, -4.6599f, -32.4274f);
-                floorPt.SetActive(true);
-                pt.GetComponent<ParticleSystem>().Pause();
-                ItemPool.Floor1 = fl;
-
-                for (int i = 0; i <= 20; i++)
-                {
-                    Instantiate(ItemPool.Floor1, new Vector3(-232.59f + i * 20f, 10.01f, 32.4219f), Quaternion.Euler(0, 0, 0));
-                }
-                gameObject.GetComponent<SceneControl>().FloorAutoPlaceLoop();
-
-                SceneControl.Detect();
-
             }
-            gameObject.GetComponent<DamageHero>().damageDealt = 0;
+            var focus = gameObject.transform.Find("Focus Blast").gameObject;
+            var pt = focus.transform.Find("Particle_rocks_small").gameObject;
+            ItemPool.FloorPt = Instantiate(pt, new Vector3(0, 0, 0), new Quaternion());
+            ItemPool.FloorPt.GetComponent<ParticleSystem>().startSpeed = -10;
+            ItemPool.FloorPt.GetComponent<ParticleSystem>().emissionRate = 50;
+            var fl = Instantiate(floor, new Vector3(-232.59f, 10.01f, 32.4219f), Quaternion.Euler(0, 0, 0));
+            var floorCollision = Instantiate(ItemPool.Floor, fl.transform);
+            floorCollision.transform.localPosition = new Vector3(14.4782f, -10.01f, 0f);
+            fl.AddComponent<FloorFall>();
+            var floorPt = Instantiate(ItemPool.FloorPt, fl.transform);
+            floorPt.transform.localPosition = new Vector3(3.4764f, -4.6599f, -32.4274f);
+            floorPt.SetActive(true);
+            pt.GetComponent<ParticleSystem>().Pause();
+            ItemPool.Floor1 = fl;
+
+            for (int i = 0; i <= 20; i++)
+            {
+                Instantiate(ItemPool.Floor1, new Vector3(-232.59f + i * 20f, 10.01f, 32.4219f), Quaternion.Euler(0, 0, 0));
+            }
+            gameObject.GetComponent<SceneControl>().FloorAutoPlaceLoop();
+
+            SceneControl.Detect();
         }
     }
     public class PlumeFall : MonoBehaviour
@@ -1504,22 +1536,25 @@ namespace INFINITY
         public void StartToLockDtabPhase3()
         {
             float x = 0;
+
             if (HeroController.instance.gameObject.transform.localScale.x < 0)
             {
-                x =  (12 + (float)R2 * 16);
+                x = (12 + (float)R2 * 8);
             }
             else
             {
-                x =  (-12 - (float)R2 * 16);
+                x = (-12 - (float)R2 * 8);
             }
             float y = 16;
+
             LockLocalPosition = new Vector3(x, y, 0f);
+
             LockLoopDtab();
         }
         public void StartToLockDtabPhase4()
         {
             float x = 0;
-            x =  (17 + (float)R2 * 12);
+            x =  (14 + (float)R2 * 12);
             float y = 16;
             LockLocalPosition = new Vector3(x, y, 0f);
             LockLoopDtab();
@@ -3174,6 +3209,8 @@ namespace INFINITY
                 var core = wave.transform.Find("slash_core").gameObject;
                 core.transform.Find("hurtbox").gameObject.AddComponent<WaveControl>();
                 core.transform.Find("hurtbox").gameObject.GetComponent<WaveControl>().speed = speed;
+
+                gameObject.transform.position += new Vector3(0, -1000f, 0);
             }
             public void ShrikeLoop()
             {
@@ -3808,6 +3845,7 @@ namespace INFINITY
                 }
                 else
                 {
+                    //gameObject.GetComponent<LockAngleWaitForAttack>().StartToLockDtab(180f, 16f);
                     gameObject.GetComponent<LockAngleWaitForAttack>().StartToLockDtab(180f, 16f);
                 }
                 AnimFreezeTime(0.3f, 0.05f);
