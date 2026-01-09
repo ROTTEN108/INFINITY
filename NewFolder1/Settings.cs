@@ -14,5 +14,7 @@ namespace INFINITY
         public bool skillGot = false;
 
         public bool skillOn = false;
+
+        public bool lineOff = false;
     }
 }

@@ -33,6 +33,9 @@ namespace INFINITY
         int phase2Hp_H = 2000;
         int phase3Hp_H = 1100;
         int phase4Hp_H = 600;
+
+        bool p3started = false;
+        bool p5started = false;
         public void Start()
         {
             phase = 0;
@@ -132,6 +135,29 @@ namespace INFINITY
                     phase = 1;
                 }
             }
+            if(INFINITY.HardMode == 1)
+            {
+                if (phase == 3 || phase == 4)
+                {
+                    if (!p3started)
+                    {
+                        p3started = true;
+
+                        CameraControl.P3();
+                    }
+                }
+
+                if (phase == 5)
+                {
+                    if (!p5started)
+                    {
+                        p5started = true;
+
+                        CameraControl.P5();
+                    }
+                }
+            }
+
         }
     }
 }

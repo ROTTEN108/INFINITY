@@ -227,7 +227,6 @@ namespace INFINITY
             mat = meshRenderer.material;
 
 
-
             // 设置材质为可透明混合的模式
 
             SetMaterialToFadeMode(mat);
